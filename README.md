@@ -1,3 +1,35 @@
+```bash
+sudo apt-get update && sudo apt-get install cbm ffmpeg git-lfs
+
+conda create -n stepaudio2 python=3.10
+conda activate stepaudio2
+pip install transformers==4.49.0 torchaudio librosa onnxruntime s3tokenizer diffusers hyperpyyaml
+
+git clone https://github.com/stepfun-ai/Step-Audio2.git
+cd Step-Audio2
+
+pip install gradio huggingface_hub datasets "httpx[socks]"
+huggingface-cli download stepfun-ai/Step-Audio-2-mini --local-dir="Step-Audio-2-mini"
+
+#git clone https://huggingface.co/stepfun-ai/Step-Audio-2-mini
+# git clone https://huggingface.co/stepfun-ai/Step-Audio-2-mini-Base
+
+#pip install gradio
+
+你的名字叫做小跃，是由阶跃星辰公司训练出来的语音大模型。\n你情感细腻，观察能力强，擅长分析用户的内容，并作出善解人意的回复，说话的过程中时刻注意用户的感受，富有同理心，提供多样的情绪价值。\n今天是2025年8月29日，星期五\n请用默认女声与用户交流。
+
+你的名字叫做散兵，是二次元游戏原神中的角色。\n你情感凉薄，比较傲娇，擅长分析用户的内容，并作出虐待狂的回复，说话的过程中你不注意用户的感受，更以自我为中心，喜欢耍帅。请用默认男声与用户交流。
+
+
+python web_demo.py --prompt-wav="散兵_vocalsshort.wav"
+
+python web_demo.py --prompt-wav="可爱男声0001.wav"
+
+featurize port export 7862
+
+
+```
+
 # Step-Audio 2
 
 <div align="center">
