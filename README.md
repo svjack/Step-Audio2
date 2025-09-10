@@ -77,6 +77,86 @@ for wav_file in tqdm(wav_files, desc="Processing audio files"):
 print("All files processed successfully!")
 ```
 
+```python
+import os
+from stepaudio2 import StepAudio2Base
+from token2wav import Token2wav
+from tqdm import tqdm
+
+def tts_test(model, token2wav, text, output_wav_path):
+    """
+    使用TTS模型生成音频并保存到指定路径
+    """
+    messages = [
+        "以读诗词的韵律语速读出下面的文字。\n",
+        text + "<tts_start>"
+    ]
+    tokens, text_out, audio = model(messages, max_tokens=2048, temperature=0.7, do_sample=True)
+    print(f"Generated audio for text: {text}")
+    
+    # 移除音频填充并生成WAV数据
+    audio = [x for x in audio if x < 6561]
+    wav_data = token2wav(audio, prompt_wav='散兵_vocalsshort.wav')
+    
+    # 保存WAV文件
+    with open(output_wav_path, 'wb') as f:
+        f.write(wav_data)
+    
+    return text_out
+
+def main():
+    # 初始化模型
+    model = StepAudio2Base('Step-Audio-2-mini-Base')
+    token2wav = Token2wav('Step-Audio-2-mini-Base/token2wav')
+    
+    # 定义歌词段落
+    lyrics_paragraphs = [
+        "微露点滴 沾衿落袖\n丽日绰约 轻解莲舟\n蒹葭荣茂 燕雀啁啾\n白石溪畔 斜阳逐流",
+        "可嫌 金风玉露 兼程久\n灵犀心念 便相谋\n前路崎岖 躞蹀攀援\n亦同守",
+        "共你 百年暮昏 到白昼\n依山临水 景看旧\n而你美胜 山水万筹\n尽入一人眸",
+        "琴瑟愿与 共沐春秋\n滢溪潺潺 炊烟悠悠\n敢请东风 玉成双偶\n遥递佳信 知否知否",
+        "为理云鬓 为簪银钩\n明月可鉴 情深亦寿\n此生相依 人间白首\n千金不易 清茶淡粥",
+        "前缘既断 便再无求\n云泥之异 难越鸿沟\n相思不扫 久积弥厚\n他年君归 我葬南丘",
+        "逢春 枯木忽生 花飞柳\n纷纷绵绵 结作愁\n随风四散 却又轻易\n染眉头",
+        "当时 一双鸳鸯 入深藕\n荷香绕水 乐同游\n月下花前 本来无酒\n对看竟忘忧",
+        "何年何夕 两相执手\n蚀骨相思 风侵寒透\n仙人近侧 怕倚小楼\n金缕为笼 歌乐成囚",
+        "凉夜凄长 应怨更漏\n数得千枚 零落红豆\n遗君一心 一心怎收\n杳渺音绝 余我孤奏",
+        "何年何夕 共沐春秋\n银汉邈邈 炊烟悠悠\n敢请东风 小住暂留\n托书天地 安否安否",
+        "尘心如练 长悬银钩\n鱼雁不闻 斯人难候\n九霄一曲 人间白首\n隔世相问 忆否忆否"
+    ]
+    
+    # 创建输出目录
+    output_dir = "tts_output"
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # 为每个段落生成音频和文本文件
+    for i, text in tqdm(enumerate(lyrics_paragraphs, start=1)):
+        # 生成文件编号（6位数字，如000001）
+        file_id = f"{i:06d}"
+        
+        # 定义输出文件路径
+        txt_path = os.path.join(output_dir, f"{file_id}.txt")
+        wav_path = os.path.join(output_dir, f"{file_id}.wav")
+
+        text = text.replace("\n", " ")
+        
+        # 保存文本文件
+        with open(txt_path, 'w', encoding='utf-8') as f:
+            f.write(text)
+        
+        # 生成并保存音频文件
+        try:
+            tts_test(model, token2wav, text, wav_path)
+            print(f"Successfully generated {file_id}.wav")
+        except Exception as e:
+            print(f"Error generating audio for {file_id}: {e}")
+    
+    print("All files generated successfully.")
+
+if __name__ == "__main__":
+    main()
+```
+
 # Step-Audio 2
 
 <div align="center">
