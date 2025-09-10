@@ -28,7 +28,53 @@ python web_demo.py --prompt-wav="可爱男声0001.wav"
 
 featurize port export 7862
 
+```
 
+```python
+import os
+from gradio_client import Client, handle_file
+import shutil
+from tqdm import tqdm
+
+# 初始化客户端
+client = Client("http://localhost:7862")
+
+# 输入和输出路径
+input_dir = "genshin_impact_mavuika_audio_sample"
+output_dir = "genshin_StepAudio2_Aether_answer_Mavuika_audio_sample_50"
+os.makedirs(output_dir, exist_ok=True)
+
+# 获取所有wav文件并按字典序排序，取前50个
+wav_files = sorted([f for f in os.listdir(input_dir) if f.endswith('.wav')])[:50]
+
+# 处理每个文件
+for wav_file in tqdm(wav_files, desc="Processing audio files"):
+    # 调用API
+    result = client.predict(
+        chatbot=[],
+        mic=handle_file(os.path.join(input_dir, wav_file)),
+        text=None,
+        api_name="/on_submit"
+    )
+    
+    # 获取生成的wav文件路径
+    generated_wav = result[0][-1]["content"]["file"]
+    
+    # 构建输出文件名（与输入文件同名）
+    output_wav_path = os.path.join(output_dir, wav_file)
+    
+    # 拷贝生成的wav文件到输出目录并重命名
+    shutil.copy2(generated_wav, output_wav_path)
+    
+    # 查找并拷贝同名的txt文件
+    txt_file = os.path.splitext(wav_file)[0] + '.txt'
+    input_txt_path = os.path.join(input_dir, txt_file)
+    
+    if os.path.exists(input_txt_path):
+        output_txt_path = os.path.join(output_dir, txt_file)
+        shutil.copy2(input_txt_path, output_txt_path)
+
+print("All files processed successfully!")
 ```
 
 # Step-Audio 2
